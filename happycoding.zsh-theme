@@ -36,11 +36,12 @@ function login_info() {
 
 # directory
 function directory() {
-    local color="%{$fg_no_bold[cyan]%}";
+    local color="%{$fg_bold[cyan]%}";
     # REF: https://stackoverflow.com/questions/25944006/bash-current-working-directory-with-replacing-path-to-home-folder
     local directory="${PWD/#$HOME/~}";
     local color_reset="%{$reset_color%}";
-    echo "%F{87}%1~%f%b";
+    #echo "%F{87}%1~%f%b";  # brighter;
+		echo "${color}%1~${color_reset}";
 }
 
 
@@ -68,9 +69,11 @@ function update_command_status() {
     export COMMAND_RESULT=$COMMAND_RESULT
     if $COMMAND_RESULT;
     then
-        arrow="%B%F{009}❱%F{227}❱%F{046}❱";
+        # arrow="%B%F{009}❱%F{227}❱%F{046}❱";  # brighter
+				arrow="%{$fg_bold[red]%}❱%{$fg_bold[yellow]%}❱%{$fg_bold[green]%}❱";
     else
-        arrow="%B%F{009}❱❱❱";
+        #arrow="%B%F{009}❱❱❱";  # brighter
+				arrow="%{$fg_bold[red]%}❱❱❱";
     fi
     COMMAND_STATUS="${arrow}${reset_font}${color_reset}";
 }
@@ -83,13 +86,13 @@ function command_status() {
 
 # output command execute after
 output_command_execute_after() {
-    if [ "$COMMAND_TIME_BEIGIN" = "-20200325" ] || [ "$COMMAND_TIME_BEIGIN" = "" ];
+		if [ "$COMMAND_TIME_BEGIN" = "-20200325" ] || [ "$COMMAND_TIME_BEGIN" = "" ];
     then
         return 1;
     fi
 
     # cmd
-    local cmd="${$(fc -l | tail -1)#*  }";
+    local cmd="${$(fc -ln | tail -1)#*  }";
     local color_cmd="";
     if $1;
     then
@@ -102,8 +105,43 @@ output_command_execute_after() {
 
     # time
     local time="[$(date +%H:%M:%S)]"
-    local color_time="$fg_no_bold[cyan]";
+    local color_time="$fg_no_bold[yellow]";
     time="${color_time}${time}${color_reset}";
+		
+		# cost
+    local time_end="$(current_time_seconds)";
+    local cost=`bc <<< "${time_end}-${COMMAND_TIME_BEGIN}"`;
+    COMMAND_TIME_BEGIN="-20200325"
+    
+		# if cost is 0 don't print
+		if [ "${cost}" = "0" ]; then
+       return 1
+		fi
+
+		cost="${cost}s"
+    local color_cost="$fg_no_bold[cyan]";
+    cost="${color_cost}${cost}${color_reset}";
+		
+		# print
+		echo -e "${time} ${cost} ${cmd}";
+}
+
+# command execute before
+# REF: http://zsh.sourceforge.net/Doc/Release/Functions.html
+preexec() {
+    COMMAND_TIME_BEGIN="$(current_time_seconds)";
+}
+
+current_time_seconds() {
+    local time_millis;
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        # Linux
+        time_s="$(date +%s)";
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        time_s="$(date +%s)";
+    fi
+    echo $time_s;
 }
 
 # command execute after
