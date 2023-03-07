@@ -188,5 +188,5 @@ TRAPALRM() {
 
 # prompt
 # PROMPT='$(real_time) $(login_info) $(directory) $(git_status)$(command_status) ';
-PROMPT='$(directory) $(git_status)$(command_status) ';
+PROMPT='$(directory) $(kube_ps1) $(git_status)$(command_status) ';
 RPROMPT='$(real_time)'
