@@ -118,8 +118,23 @@ output_command_execute_after() {
        return 1
 		fi
 
-		cost="${cost}s"
     local color_cost="$fg_no_bold[cyan]";
+    
+    # format cost
+    local cost_days=$(( cost / (60 * 60 * 24) ));
+    local cost_hours=$(( (cost-cost_days*60*60*24)/(60*60) ));
+    local cost_minutes=$(( (cost-cost_days*60*60*24-cost_hours*60*60)/60 ));
+    local cost_seconds=$(( (cost-cost_days*60*60*24-cost_hours*60*60-cost_minutes*60) ));
+    
+    if [ "${cost_days}" != "0" ]; then # Days
+      cost="${cost_days}d ${cost_hours}h ${cost_minutes}m ${cost_seconds}s";
+    elif [ "${cost_hours}" != "0" ]; then # Hours
+      cost="${cost_hours}h ${cost_minutes}m ${cost_seconds}s";
+    elif [ "${cost_minutes}" != "0" ]; then # Minutes
+       cost="${cost_minutes}m ${cost_seconds}s";
+    else; # Seconds
+      cost="${cost}s"
+    fi
     cost="${color_cost}${cost}${color_reset}";
 		
 		# print
