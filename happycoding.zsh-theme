@@ -203,5 +203,9 @@ TRAPALRM() {
 
 # prompt
 # PROMPT='$(real_time) $(login_info) $(directory) $(git_status)$(command_status) ';
-PROMPT='$(directory) $(kube_ps1) $(git_status)$(command_status) ';
+if command -v kube_ps1 ; then
+	PROMPT='$(directory) $(kube_ps1) $(git_status)$(command_status) ';
+else;
+	PROMPT='$(directory) $(git_status)$(command_status) ';
+fi
 RPROMPT='$(real_time)'
