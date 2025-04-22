@@ -1,5 +1,3 @@
-echo "\e[38;5;196mH\e[38;5;50ma\e[38;5;99mp\e[38;5;82mp\e[38;5;226my \e[38;5;49mC\e[38;5;21mo\e[38;5;203md\e[38;5;11mi\e[38;5;48mn\e[38;5;161mg"
-
 # time
 function real_time() {
     local color="%{$fg_no_bold[cyan]%}";                    # color in PROMPT need format in %{XXX%} which is not same with echo
@@ -51,15 +49,6 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} ";
 ZSH_THEME_GIT_PROMPT_DIRTY="%F{203}) 🔥";
 ZSH_THEME_GIT_PROMPT_CLEAN="%F{203})";
 
-function update_git_status() {
-    GIT_STATUS=$(git_prompt_info);
-}
-
-function git_status() {
-    echo "${GIT_STATUS}"
-}
-
-
 # command
 function update_command_status() {
     local arrow="";
@@ -107,25 +96,25 @@ output_command_execute_after() {
     local time="[$(date +%H:%M:%S)]"
     local color_time="$fg_no_bold[yellow]";
     time="${color_time}${time}${color_reset}";
-		
+
 		# cost
     local time_end="$(current_time_seconds)";
     local cost=`bc <<< "${time_end}-${COMMAND_TIME_BEGIN}"`;
     COMMAND_TIME_BEGIN="-20200325"
-    
+
 		# if cost is 0 don't print
 		if [ "${cost}" = "0" ]; then
        return 1
 		fi
 
     local color_cost="$fg_no_bold[cyan]";
-    
+
     # format cost
     local cost_days=$(( cost / (60 * 60 * 24) ));
     local cost_hours=$(( (cost-cost_days*60*60*24)/(60*60) ));
     local cost_minutes=$(( (cost-cost_days*60*60*24-cost_hours*60*60)/60 ));
     local cost_seconds=$(( (cost-cost_days*60*60*24-cost_hours*60*60-cost_minutes*60) ));
-    
+
     if [ "${cost_days}" != "0" ]; then # Days
       cost="${cost_days}d ${cost_hours}h ${cost_minutes}m ${cost_seconds}s";
     elif [ "${cost_hours}" != "0" ]; then # Hours
@@ -136,7 +125,7 @@ output_command_execute_after() {
       cost="${cost}s"
     fi
     cost="${color_cost}${cost}${color_reset}";
-		
+
 		# print
 		echo -e "${time} ${cost} ${cmd}";
 }
@@ -172,9 +161,6 @@ precmd() {
         last_cmd_result=false;
     fi
 
-    # update_git_status
-    update_git_status;
-
     # update_command_status
     update_command_status $last_cmd_result;
 
@@ -203,9 +189,11 @@ TRAPALRM() {
 
 # prompt
 # PROMPT='$(real_time) $(login_info) $(directory) $(git_status)$(command_status) ';
-if command -v kube_ps1 ; then
-	PROMPT='$(directory) $(kube_ps1) $(git_status)$(command_status) ';
-else;
-	PROMPT='$(directory) $(git_status)$(command_status) ';
+if command -v kube_ps1 > /dev/null; then
+	PROMPT='$(kube_ps1) $(git_prompt_info)$(directory) $(command_status) ';
+else
+	PROMPT='$(git_status) $(directory) $(command_status) ';
 fi
 RPROMPT='$(real_time)'
+
+echo "\e[38;5;196mH\e[38;5;50ma\e[38;5;99mp\e[38;5;82mp\e[38;5;226my \e[38;5;49mC\e[38;5;21mo\e[38;5;203md\e[38;5;11mi\e[38;5;48mn\e[38;5;161mg\e[0m"
